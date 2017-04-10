@@ -1,35 +1,37 @@
-mod cmd;
-use cmd::Cmd;
-use cmd::CmdMatch;
-use cmd::CmdOption;
-use cmd::CmdFactory;
-use cmd::Arg;
+use exec::*;
+use cmd::*;
+use git::*;
 
-struct OpenCmd {
-    // private data about opening
+pub struct OpenCmd {}
+
+impl OpenCmd {
+    // it does stuff, private methods here?
+    fn open_gerrit (&self, id: String) -> ExecResult {
+        exec("open", vec![&format!("https://gerrit.instructure.com/{}", id)])
+    }
 }
-
-// impl OpenCmd {
-//     // it does stuff, private methods here?
-//     fn new() -> OpenCmd {
-//         OpenCmd {}
-//     }
-// }
 
 impl Cmd for OpenCmd {
     fn get_help (&self) -> String {
         "".to_owned()
     }
 
-    fn execute (&self, args: &Vec<String>) {
-        println!("EXECUTING OPEN")
+    fn execute (&self, args: &[String]) {
+        let git = GitInfo::read();
+
+        match &args.first() {
+            &Some(arg) => match arg.as_ref() {
+                "jira" => (),
+                "mobile" => (),
+                _ => ()
+            },
+            &None => ()
+        };
     }
 }
 
-pub struct OpenCmdFactory {}
-
-impl CmdFactory<OpenCmd> for OpenCmdFactory {
-    fn create() -> {
-        OpenCmd {}
+impl CmdFactory for OpenCmd {
+    fn create() -> Box<Cmd> {
+        Box::new(OpenCmd {})
     }
 }
