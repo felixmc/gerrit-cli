@@ -1,0 +1,11 @@
+[package]
+name = "ger"
+version = "0.1.0"
+authors = ["Felix Milea-Ciobanu <felixmilea@gmail.com>"]
+
+[dependencies]
+getopts = "0.2.14"
+
+[[bin]]
+name = "ger"
+path = "src/ger.rs"
