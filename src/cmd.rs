@@ -21,7 +21,7 @@ impl ArgMatch for Arg {
 
 // define command <thing> that can be executed and has a help message
 pub trait Cmd {
-    fn get_help(&self) -> String;
+    fn get_help(&self) -> &str;
     fn execute(&self, &[String]);
 }
 
@@ -31,14 +31,25 @@ pub struct CmdOption {
     pub cmd: Box<Cmd>,
 }
 
+// make CmdOption be treated as a command by proxying to inner command
+impl Cmd for CmdOption {
+    fn get_help(&self) -> &str {
+        self.cmd.get_help()
+    }
+
+    fn execute(&self, args: &[String]) {
+        self.cmd.execute(args)
+    }
+}
+
 // command that takes in command options and executes cmd based on args
 pub struct CmdMatch {
     pub options: Vec<Box<CmdOption>>,
 }
 
 impl Cmd for CmdMatch {
-    fn get_help(&self) -> String {
-        "".to_owned() // TODO: real help
+    fn get_help(&self) -> &str {
+        "" // TODO: real help
     }
 
     fn execute(&self, args: &[String]) {
@@ -50,7 +61,7 @@ impl Cmd for CmdMatch {
     }
 }
 
-// thing that creates new cmd
-pub trait CmdFactory {
-    fn create() -> Box<Cmd>;
+// thing that creates new options
+pub trait OptionFactory {
+    fn option() -> Box<CmdOption>;
 }

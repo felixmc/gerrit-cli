@@ -1,37 +1,57 @@
 use exec::*;
 use cmd::*;
 use git::*;
+use gerrit::*;
 
 pub struct OpenCmd {}
 
 impl OpenCmd {
-    // it does stuff, private methods here?
-    fn open_gerrit (&self, id: String) -> ExecResult {
-        exec("open", vec![&format!("https://gerrit.instructure.com/{}", id)])
+    fn open_gerrit (&self, id: &str) {
+        exec("open", vec![&format!("https://gerrit.instructure.com/{}", id)]);
+    }
+
+    fn open_diff (&self, id: &str) {
+        exec("open", vec![&format!("https://gerrit.instructure.com/{}", id)]);
+    }
+
+    fn open_mobile (&self, id: &str) {
+        exec("open", vec![&format!("https://gerrit.instructure.com/{}", id)]);
+    }
+
+    fn open_jira (&self, id: &str) {
+        exec("open", vec![&format!("https://instructure.atlassian.net/browse/{}", id)]);
     }
 }
 
 impl Cmd for OpenCmd {
-    fn get_help (&self) -> String {
-        "".to_owned()
+    fn get_help (&self) -> &str {
+        ""
     }
 
     fn execute (&self, args: &[String]) {
         let git = GitInfo::read();
 
-        match &args.first() {
-            &Some(arg) => match arg.as_ref() {
-                "jira" => (),
-                "mobile" => (),
-                _ => ()
-            },
-            &None => ()
+        if &args.len() > &0usize {
+            match (&args.first()).unwrap().as_ref() {
+                "jira" => self.open_jira(&git.jira_id()),
+                "diff" => self.open_diff(&git.change_id()),
+                "mobile" => self.open_mobile(&git.change_id()),
+                _ => println!("{}", self.get_help())
+            }
+        } else {
+            self.open_gerrit(&git.change_id())
         };
     }
 }
 
-impl CmdFactory for OpenCmd {
-    fn create() -> Box<Cmd> {
-        Box::new(OpenCmd {})
+impl OptionFactory for OpenCmd {
+    fn option() -> Box<CmdOption> {
+        Box::new(CmdOption {
+            arg: Arg {
+                names: vec!["open".to_owned()],
+                info: "Open web pages related to the gerrit".to_owned(),
+            },
+            cmd: Box::new(OpenCmd {})
+        })
     }
 }

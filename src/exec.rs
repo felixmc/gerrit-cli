@@ -1,6 +1,7 @@
 use std::process::Command;
 use std::process::Output;
 use std::io::Error;
+use std::str;
 
 pub type ExecResult = Result<ExecOutput, Error>;
 
@@ -16,8 +17,9 @@ impl ExecOutput {
     }
 
     pub fn stdout_to_string (&self) -> String {
-        self.output.stdout.iter()
-            .fold(String::new(), |sum, val| format!("{}{}", sum, *val as char))
+        let ref vec: Vec<u8> = self.output.stdout;
+        let chars: Vec<char> = vec.iter().map(|&e| e as char).collect();
+        chars.into_iter().collect()
     }
 
     // fn status (&self) {
