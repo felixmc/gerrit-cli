@@ -4,7 +4,6 @@ version = "0.1.0"
 authors = ["Felix Milea-Ciobanu <felixmilea@gmail.com>"]
 
 [dependencies]
-hyper = "0.10"
 json = "*"
 regex = "0.2"
 

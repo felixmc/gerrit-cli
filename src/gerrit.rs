@@ -1,14 +1,16 @@
 use std::env;
 use std::io::Read;
-use hyper::Client;
+
 use json;
 use json::JsonValue;
+
+use exec::*;
 
 static gerrit_url: &'static str = "https://gerrit.instructure.com/";
 
 pub struct Change {
-    id: String,
-    change_id: String,
+    pub number: String,
+    pub change_id: String,
 }
 
 pub struct Gerrit {
@@ -19,35 +21,40 @@ pub struct Gerrit {
 impl Gerrit {
     pub fn new () -> Gerrit {
         Gerrit {
-            user: env::var("GERRIT_USER").unwrap(),
-            pword: env::var("GERRIT_PWORD").unwrap()
-        }
-    }
-
-    fn get (path: &str) -> JsonValue {
-        let url = format!("{}{}", gerrit_url, path);
-        let client = Client::new();
-
-        match client.get(&url).send() {
-            Ok(mut res) => {
-                let mut raw_json = String::new();
-                res.read_to_string(&mut raw_json);
-                println!("RAW_JSON: {}", raw_json);
-                match json::parse(&raw_json) {
-                    Ok(json_data) => json_data,
-                    Err(error) => panic!("bad json from Gerrit")
-                }
+            user: match env::var("GERRIT_USER") {
+                Ok(val) => val,
+                Err(_) => panic!("missing GERRIT_USER in ENV")
             },
-            Err(error) => {
-                panic!("network issues reaching gerrit ({}): {}", url, error)
+            pword: match env::var("GERRIT_PWORD") {
+                Ok(val) => val,
+                Err(_) => panic!("missing GERRIT_PWORD in ENV")
             }
         }
     }
 
-    pub fn change (change_id: &str) -> Change {
-        let json_data = Self::get(&format!("changes/{}", change_id));
+    fn get (&self, path: &str) -> JsonValue {
+        let url = format!("{}{}", gerrit_url, path);
+        let user_pass = format!("{}:{}", self.user, self.pword);
+
+        match exec("curl", vec!["--digest", "-u", &user_pass, &url]) {
+            Ok(output) => {
+                let str_output: Box<Vec<String>> = Box::new(output.stdout_to_string().lines().skip(1).map(|x| x.to_string()).collect());
+                let raw_json = str_output.join("\n");
+
+                println!("RAW_JSON: {}", raw_json);
+                match json::parse(&raw_json) {
+                    Ok(json_data) => json_data,
+                    Err(err) => panic!("bad json from gerrit: {}", err)
+                }
+            },
+            Err(err) => panic!("cannot reach gerrit: {}", err)
+        }
+    }
+
+    pub fn change (&self, change_id: &str) -> Change {
+        let json_data = self.get(&format!("a/changes/{}", change_id));
         Change {
-            id: json_data["id"].as_str().unwrap().to_owned(),
+            number: json_data["_number"].as_str().unwrap().to_owned(),
             change_id: change_id.to_owned(),
         }
     }

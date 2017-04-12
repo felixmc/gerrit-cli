@@ -21,8 +21,29 @@ impl ArgMatch for Arg {
 
 // define command <thing> that can be executed and has a help message
 pub trait Cmd {
-    fn get_help(&self) -> &str;
     fn execute(&self, &[String]);
+}
+
+pub struct FuncCmd {
+    func: fn(&[String])
+}
+
+impl FuncCmd {
+    pub fn option (names: Vec<&str>, info: &str, func: fn(&[String])) -> Box<CmdOption> {
+        Box::new(CmdOption {
+            arg: Arg {
+                names: names.into_iter().map(|x| x.to_string()).collect(),
+                info: info.to_owned(),
+            },
+            cmd: Box::new(FuncCmd { func: func })
+        })
+    }
+}
+
+impl Cmd for FuncCmd {
+    fn execute (&self, args: &[String]) {
+        (&self.func)(args)
+    }
 }
 
 // combines an arg with a cmd
@@ -33,11 +54,7 @@ pub struct CmdOption {
 
 // make CmdOption be treated as a command by proxying to inner command
 impl Cmd for CmdOption {
-    fn get_help(&self) -> &str {
-        self.cmd.get_help()
-    }
-
-    fn execute(&self, args: &[String]) {
+    fn execute (&self, args: &[String]) {
         self.cmd.execute(args)
     }
 }
@@ -45,18 +62,43 @@ impl Cmd for CmdOption {
 // command that takes in command options and executes cmd based on args
 pub struct CmdMatch {
     pub options: Vec<Box<CmdOption>>,
+    pub default_behavior: fn(&CmdMatch)
+}
+
+impl CmdMatch {
+    fn format_option (names: &str, info: &str) -> String {
+        format!("\n  {:16}{}", names, info)
+    }
+
+    pub fn get_help(&self) -> String {
+        self.options
+            .iter()
+            .fold(String::new(), |acc, opt| {
+                let names = &opt.arg.names.iter().fold(String::new(), |names, name| format!("{} {}", name, names));
+                let option_text = Self::format_option(names, &opt.arg.info);
+                format!("{}{}", acc, option_text)
+            }) + &Self::format_option("--help", "Display this help menu")
+    }
+
+    pub fn print_help (&self) {
+        println!("Help:{}", self.get_help())
+    }
 }
 
 impl Cmd for CmdMatch {
-    fn get_help(&self) -> &str {
-        "" // TODO: real help
-    }
-
     fn execute(&self, args: &[String]) {
-        let opt = (&self.options).iter().find(|x| x.arg.matches(&args));
-        match opt {
-            Some(option) => option.cmd.execute(&args[1..]),
-            None => println!("Help: {}", self.get_help()),
+        match args.len() {
+            0 => (self.default_behavior)(&self),
+            _ => match &args[0][..] {
+                "--help" => self.print_help(),
+                _ => {
+                    let opt = self.options.iter().find(|x| x.arg.matches(&args));
+                    match opt {
+                        Some(option) => option.cmd.execute(&args[1..]),
+                        None => self.print_help(),
+                    }
+                }
+            },
         }
     }
 }

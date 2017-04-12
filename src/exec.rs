@@ -17,9 +17,11 @@ impl ExecOutput {
     }
 
     pub fn stdout_to_string (&self) -> String {
-        let ref vec: Vec<u8> = self.output.stdout;
-        let chars: Vec<char> = vec.iter().map(|&e| e as char).collect();
-        chars.into_iter().collect()
+        self.output.stdout
+            .clone()
+            .into_iter()
+            .map(|e| e as char)
+            .collect()
     }
 
     // fn status (&self) {
