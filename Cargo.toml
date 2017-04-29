@@ -4,8 +4,11 @@ version = "0.1.0"
 authors = ["Felix Milea-Ciobanu <felixmilea@gmail.com>"]
 
 [dependencies]
-json = "*"
+serde_json = "0.9"
 regex = "0.2"
+ansi_term = "0.9.0"
+term = "0.4.5"
+prettytable-rs = "^0.6"
 
 [[bin]]
 name = "ger"

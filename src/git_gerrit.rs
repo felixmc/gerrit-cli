@@ -14,7 +14,7 @@ impl GitGerrit {
         }
     }
 
-    pub fn get_change (&self) -> Change {
-        self.gerrit.change(&self.git_info.change_id())
+    pub fn get_change (&self) -> ChangeStatus {
+        self.gerrit.get_change(&self.git_info.change_id())
     }
 }

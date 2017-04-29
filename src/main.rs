@@ -1,16 +1,29 @@
-#[macro_use] extern crate json;
+#[macro_use] extern crate serde_json;
+#[macro_use] extern crate prettytable;
 extern crate regex;
+extern crate term;
+extern crate ansi_term;
 
 mod exec;
 mod git;
 mod gerrit;
 mod git_gerrit;
-mod cmd;
+mod print;
+mod table;
 
 mod cmd_open;
-
-use cmd::*;
 use cmd_open::*;
+
+mod cmd_ls;
+use cmd_ls::*;
+
+mod cmd_status;
+use cmd_status::*;
+
+mod cmd;
+use cmd::*;
+
+// use ansi_term::*;
 
 fn print_help (cmd: &CmdMatch) {
     cmd.print_help();
@@ -22,7 +35,9 @@ impl GerCmd {
         CmdMatch {
             default_behavior: print_help,
             options: vec![
-                OpenCmd::option()
+                OpenCmd::option(),
+                LsCmd::option(),
+                StatusCmd::option(),
             ]
         }
     }

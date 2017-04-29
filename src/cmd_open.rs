@@ -49,7 +49,7 @@ impl OptionFactory for OpenCmd {
         Box::new(CmdOption {
             arg: Arg {
                 names: vec!["open".to_owned()],
-                info: "Open web pages related to the gerrit".to_owned(),
+                info: "open web pages related to the gerrit".to_owned(),
             },
             cmd: Self::command()
         })
