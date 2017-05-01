@@ -31,7 +31,6 @@ impl Cmd for StatusCmd {
         println!("| {} | {} | {} |", cell_content("bots".to_owned(), 13, White), review_cell(change.build_review, 30), review_cell(change.lint_review, 29));
         println!("+{}+{}+{}+{}+{}+", row_separator(15), row_separator(20), row_separator(9), row_separator(10), row_separator(20));
 
-
         println!("| {} | {} | {} | {} |", cell_content("reviews".to_owned(), 13, White), review_cell(change.code_review, 20), review_cell(change.qa_review, 20), review_cell(change.product_review, 20));
         println!("+{}+{}+{}+{}+", row_separator(15), row_separator(20), row_separator(20), row_separator(20));
     }
