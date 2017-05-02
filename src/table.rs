@@ -18,7 +18,7 @@ pub fn cell_content_centered (data: String, span: usize, color: Colour) -> Strin
 	format!("{}{}{}", " ".repeat(spacing / 2), color.paint(data), " ".repeat((spacing / 2) + spacing % 2))
 }
 
-pub fn review_cell (review_opt: Option<ChangeReview>, width: usize) -> String {
+pub fn review_cell (review_opt: Option<ChangeReview>, width: usize, default_text: &str) -> String {
     let (text, color) = match review_opt {
         Some(review) => match review.result {
             ReviewResult::Rejected => (format!("✗ {}", review.author).to_string(), Red),
@@ -27,7 +27,7 @@ pub fn review_cell (review_opt: Option<ChangeReview>, width: usize) -> String {
             ReviewResult::Approved => (format!("✓ {}", review.author).to_string(), Green),
             _ => (" ".to_string(), White),
         },
-        None => (" ".to_string(), White)
+        None => (format!("- {} -", default_text.to_string()), Yellow)
     };
 
     cell_content_centered(text, width, color)
