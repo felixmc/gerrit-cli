@@ -2,6 +2,8 @@
 name = "ger"
 version = "0.1.0"
 authors = ["Felix Milea-Ciobanu <felixmilea@gmail.com>"]
+description = "Gerrit command line client"
+license = "MIT"
 
 [dependencies]
 serde_json = "0.9"
