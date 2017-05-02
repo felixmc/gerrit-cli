@@ -7,8 +7,6 @@ use serde_json::*;
 
 use exec::*;
 
-static gerrit_url: &'static str = "https://gerrit.instructure.com/";
-
 pub enum ReviewResult {
     Rejected,
     Approved,
@@ -89,8 +87,8 @@ impl ChangeStatus {
             lint_review: ChangeReview::parse_json(&json["labels"]["Lint-Review"]),
             build_review: ChangeReview::parse_json(&json["labels"]["Verified"]),
             can_merge: json["submittable"].as_bool().unwrap_or(false),
-            is_merged: json["status"].as_str().unwrap() == "MERGED", 
-            has_conflict: !json["mergeable"].as_bool().unwrap_or(false),                       
+            is_merged: json["status"].as_str().unwrap() == "MERGED",
+            has_conflict: !json["mergeable"].as_bool().unwrap_or(false),
         }
     }
 }
@@ -98,24 +96,20 @@ impl ChangeStatus {
 pub struct Gerrit {
     user: String,
     pword: String,
+    url: String,
 }
 
 impl Gerrit {
     pub fn new () -> Gerrit {
         Gerrit {
-            user: match env::var("GERRIT_USER") {
-                Ok(val) => val,
-                Err(_) => panic!("missing GERRIT_USER in ENV")
-            },
-            pword: match env::var("GERRIT_PWD") {
-                Ok(val) => val,
-                Err(_) => panic!("missing GERRIT_PWD in ENV")
-            }
+            user: env::var("GERRIT_USER").expect("Missing GERRIT_USER in env"),
+            pword: env::var("GERRIT_PWD").expect("Missing GERRIT_PWD in env"),
+            url: env::var("GERRIT_URL").expect("Missing GERRIT_URL in env"),
         }
     }
 
     fn get (&self, path: &str) -> Value {
-        let url = format!("{}{}", gerrit_url, path);
+        let url = format!("{}{}", &self.url, path);
         let user_pass = format!("{}:{}", self.user, self.pword);
 
         match exec("curl", vec!["--digest", "-u", &user_pass, &url]) {
