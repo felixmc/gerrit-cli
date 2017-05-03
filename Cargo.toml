@@ -1,6 +1,6 @@
 [package]
 name = "ger"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Felix Milea-Ciobanu <felixmilea@gmail.com>"]
 description = "Gerrit command line client"
 license = "MIT"

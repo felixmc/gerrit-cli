@@ -44,23 +44,28 @@ impl GerCmd {
 }
 
 fn main () {
-    std::panic::set_hook(Box::new(|x| {
-        match x.payload().downcast_ref::<&str>() {
-            // errors I expect like missing gerrit id in commit message, etc
-            Some(panic) => {
-                println!("❗ ERROR: {}", panic);
-                std::process::exit(1);
-            }
-            // something panic'd with a real runtime error
-            None => {
-                println!("❗ ERROR: something unexpected happened");
-                println!("Possible debug info: {:?}", x.payload());
-                std::process::exit(2);
-            }
-        }
-    }));
+    let mut args: Vec<String> = std::env::args().collect();
 
-    let args: Vec<String> = std::env::args().collect();
+    if args.len() > 1 && args[1] == "--debug" {
+        args.remove(1);
+    } else {
+        std::panic::set_hook(Box::new(|x| {
+            match x.payload().downcast_ref::<&str>() {
+                // errors I expect like missing gerrit id in commit message, etc
+                Some(panic) => {
+                    println!("❗ ERROR: {}", panic);
+                    std::process::exit(1);
+                }
+                // something panic'd with a real runtime error
+                None => {
+                    println!("❗ ERROR: something unexpected happened");
+                    println!("Possible debug info: {:?}", x.payload());
+                    std::process::exit(2);
+                }
+            }
+        }));
+    }
+
     // let program = args[0].clone();
 
     let ger_cmd = GerCmd::new();
