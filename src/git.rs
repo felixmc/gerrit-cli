@@ -2,13 +2,13 @@ use exec::*;
 use regex::Regex;
 
 pub struct GitInfo {
-    data: String
+    data: String,
 }
 
 impl GitInfo {
     pub fn read () -> GitInfo {
         match exec("git", vec!["log", "-1"]) {
-            Ok(output) => GitInfo { data: output.stdout_to_string() },
+            Ok(result) => GitInfo { data: result.output },
             Err(err) => panic!("cannot read git data: {}", err)
         }
     }

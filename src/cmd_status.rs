@@ -1,7 +1,7 @@
 use cmd::*;
-use gerrit::*;
+// use gerrit::*;
 use git_gerrit::*;
-use print::*;
+// use print::*;
 use table::*;
 use ansi_term::Colour::*;
 
@@ -12,7 +12,7 @@ impl Cmd for StatusCmd {
         let gerrit = GitGerrit::new();
         let change = gerrit.get_change();
 
-        let (statusText, statusColor) = match (change.is_merged, change.can_merge, change.has_conflict) {
+        let (status_text, status_color) = match (change.is_merged, change.can_merge, change.has_conflict) {
             (true, _, _) => ("✓ merged", Green),
             (_, true, _) => ("✓ ready", Cyan),
             (_, _, true) => ("✗ conflict", Red),
@@ -24,7 +24,7 @@ impl Cmd for StatusCmd {
         println!("| {} |", cell_content_centered(change.subject, 76, White));
 
         println!("+{}+{}+{}+",  row_separator(15), row_separator(15), row_separator(46));
-        println!("| {} | {} | {} |", cell_content_centered(statusText.to_owned(), 13, statusColor), cell_content_centered(change.number, 13, White), cell_content_centered(change.change_id, 44, White));
+        println!("| {} | {} | {} |", cell_content_centered(status_text.to_owned(), 13, status_color), cell_content_centered(change.number, 13, White), cell_content_centered(change.change_id, 44, White));
         println!("+{}+{}+{}+{}+", row_separator(15), row_separator(15), row_separator(14), row_separator(31));
 
         // robots

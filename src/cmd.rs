@@ -25,11 +25,11 @@ pub trait Cmd {
 }
 
 pub struct FuncCmd {
-    func: fn(&[String])
+    func: fn(args: &[String])
 }
 
 impl FuncCmd {
-    pub fn option (names: Vec<&str>, info: &str, func: fn(&[String])) -> Box<CmdOption> {
+    pub fn option (names: Vec<&str>, info: &str, func: fn(args: &[String])) -> Box<CmdOption> {
         Box::new(CmdOption {
             arg: Arg {
                 names: names.into_iter().map(|x| x.to_string()).collect(),

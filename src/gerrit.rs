@@ -5,7 +5,7 @@ use std::env;
 use serde_json;
 use serde_json::*;
 
-use exec::*;
+use curl;
 
 pub enum ReviewResult {
     Rejected,
@@ -111,17 +111,20 @@ impl Gerrit {
     fn get (&self, path: &str) -> Value {
         let url = format!("{}{}", &self.url, path);
         let user_pass = format!("{}:{}", self.user, self.pword);
+        match curl::get(&url, vec!["-u", &user_pass]) {
+            Ok(output) => match output.is_unauthorized() {
+                true => panic!("Unauthorized response from gerrit. is your HTTP password up to date?"),
+                false => match serde_json::from_str(&output.body_for_json()) {
+                    Ok(json) => json,
+                    Err(json_err) => {
+                        #[cfg(debug_assertions)]
+                        println!("URL: {0} \nJSON: {1}\n", path, output.body);
 
-        match exec("curl", vec!["--digest", "-u", &user_pass, &url]) {
-            Ok(output) => {
-                let str_output: Box<Vec<String>> = Box::new(output.stdout_to_string().lines().skip(1).map(|x| x.to_string()).collect());
-                let raw_json = str_output.join("\n");
-                match serde_json::from_str(&raw_json) {
-                    Ok(json_data) => json_data,
-                    Err(err) => panic!("bad json from gerrit: {}", err)
-                }
+                        panic!("bad json from gerrit: {}", json_err)
+                    }
+                },
             },
-            Err(err) => panic!("cannot reach gerrit: {}", err)
+            Err(curl_err) => panic!("cannot reach gerrit: {}", curl_err)
         }
     }
 

@@ -1,5 +1,5 @@
-use prettytable;
-use prettytable::cell::*;
+// use prettytable;
+// use prettytable::cell::*;
 
 use cmd::*;
 use gerrit::*;
